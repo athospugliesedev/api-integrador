@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Student {
+  id          String       @id @default(uuid())
+  name        String
+  email       String       @unique
+  password    String?
+  enrollment  String
+  course      Course       @relation(fields: [courseId], references: [id])
+  courseId    String
+  evaluations Evaluation[]
+  Enrollment  Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("students")
+}
+
+model Campus {
+  id   String @id @default(uuid())
+  name String
+
+  courses Course[]
+
+  @@map("campus")
+}
+
+model Course {
+  id         String       @id @default(uuid())
+  name       String
+  campus     Campus       @relation(fields: [campusId], references: [id])
+  campusId   String
+  subjects   Subject[]
+  Student    Student[]
+  Enrollment Enrollment[]
+
+  @@map("courses")
+}
+
+model Subject {
+  id          String       @id @default(uuid())
+  name        String
+  course      Course       @relation(fields: [courseId], references: [id])
+  courseId    String
+  evaluations Evaluation[]
+
+  @@map("subjects")
+}
+
+model Enrollment {
+  id        String  @id @default(uuid())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  course    Course  @relation(fields: [courseId], references: [id])
+  courseId  String
+
+  @@map("enrollments")
+}
+
+model Evaluation {
+  id        String  @id @default(uuid())
+  grade     Float
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+
+  @@map("evaluations")
+}

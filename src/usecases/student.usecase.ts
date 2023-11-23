@@ -1,5 +1,6 @@
 import { Student, StudentCreate, StudentRepository } from '../interfaces/student.interface';
 import { StudentRepositoryPrisma } from '../repositories/student.repository';
+import bcrypt from 'bcrypt';
 
 class StudentUseCase {
   private studentRepository: StudentRepository;
@@ -13,7 +14,17 @@ class StudentUseCase {
     if (verifyIfStudentExists) {
       throw new Error('Student already exists');
     }
-    const result = await this.studentRepository.create({ enrollment, name, courseId, email, password });
+
+    // Verifique se a senha existe antes de chamar o bcrypt.hash
+    const hashedPassword = password ? await bcrypt.hash(password, 12) : null;
+
+    const result = await this.studentRepository.create({
+      enrollment,
+      name,
+      courseId,
+      email,
+      password: hashedPassword,
+    });
 
     return result;
   }
